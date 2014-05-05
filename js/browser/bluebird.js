@@ -1709,7 +1709,17 @@ function Promise(resolver) {
     this._receiver0 = void 0;
     this._settledValue = void 0;
     this._boundTo = void 0;
-    if (resolver !== INTERNAL) this._resolveFromResolver(resolver);
+    
+    this._resolveFromResolver(function resolverIntercept(resolve, reject) {
+        this.seqResolve = resolve;
+        this.seqReject = reject;
+
+        if (resolver && resolver !== INTERNAL) {
+          resolver.apply(this, arguments);
+        }
+    }.bind(this));
+
+    this.$sql = [];
 }
 
 Promise.prototype.bind = function Promise$bind(thisArg) {
@@ -1811,13 +1821,26 @@ Promise.prototype.all = function Promise$all() {
 Promise.is = isPromise;
 
 function Promise$_all(promises, useBound) {
-    return Promise$_CreatePromiseArray(
+    var prom = Promise$_CreatePromiseArray(
         promises,
         PromiseArray,
         useBound === true && promises._isBound()
             ? promises._boundTo
             : void 0
    ).promise();
+
+    promises.forEach(function (promise) {
+        if (Promise.is(promise)) {
+            promise.on('sql', function (sql) {
+                prom.emit('sql', sql);
+            });
+
+            promise.$sql.forEach(function (sql) {
+                prom.emit('sql', sql);
+            });  
+        }
+    });
+    return prom
 }
 Promise.all = function Promise$All(promises) {
     return Promise$_all(promises, false);
@@ -2026,6 +2049,9 @@ function Promise$_then(
         ret._setBoundTo(this._boundTo);
     }
 
+    if (this.proxySql && ret && ret.emit) {
+        this.proxySql(ret);
+    }
     var callbackIndex =
         this._addCallbacks(didFulfill, didReject, didProgress, ret, receiver);
 
@@ -2489,6 +2515,11 @@ Promise.prototype._settlePromiseAt = function Promise$_settlePromiseAt(index) {
     var receiver = this._receiverAt(index);
     var promise = this._promiseAt(index);
 
+    if (this.$sql && receiver && receiver.emit) {
+        this.$sql.forEach(function (sql) {
+            receiver.emit('sql', sql);
+        });
+    }
     if (typeof handler === "function") {
         this._settlePromiseFromHandler(handler, receiver, value, promise);
     }
@@ -4263,13 +4294,26 @@ var SettledPromiseArray = require("./settled_promise_array.js")(
     Promise, PromiseArray);
 
 function Promise$_Settle(promises, useBound) {
-    return Promise$_CreatePromiseArray(
+    var settled = Promise$_CreatePromiseArray(
         promises,
         SettledPromiseArray,
         useBound === true && promises._isBound()
             ? promises._boundTo
             : void 0
    ).promise();
+
+    promises.forEach(function (promise) {
+        if (Promise.is(promise)) {
+            promise.on('sql', function (sql) {
+                settled.emit('sql', sql);
+            });
+
+            promise.$sql.forEach(function (sql) {
+                settled.emit('sql', sql);
+            });
+        }
+    });    
+    return settled
 }
 
 Promise.settle = function Promise$Settle(promises) {
