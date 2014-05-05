@@ -74,7 +74,20 @@ function Promise(resolver) {
     this._settledValue = void 0;
     //for .bind
     this._boundTo = void 0;
-    if (resolver !== INTERNAL) this._resolveFromResolver(resolver);
+    
+    // SEQUELIZE SPECIFIC
+    // Intercept the resolver so we can resolve with emit's
+    this._resolveFromResolver(function resolverIntercept(resolve, reject) {
+        self.seqResolve = resolve;
+        self.seqReject = reject;
+
+        if (resolver) {
+          resolver.apply(this, arguments);
+        }
+    }.bind(this));
+
+    this.$sql = [];
+    // END SEQUELIZE SPECIFIC
 }
 
 Promise.prototype.bind = function Promise$bind(thisArg) {
@@ -399,6 +412,13 @@ function Promise$_then(
     if (!haveInternalData && this._isBound()) {
         ret._setBoundTo(this._boundTo);
     }
+
+    // SEQUELIZE SPECIFIC
+    // Needed to transfer sql events accross .then() calls
+    if (this.proxySql && ret && ret.emit) {
+        this.proxySql(ret);
+    }
+    // END SEQUELIZE SPECIFIC
 
     var callbackIndex =
         this._addCallbacks(didFulfill, didReject, didProgress, ret, receiver);
@@ -912,6 +932,14 @@ Promise.prototype._settlePromiseAt = function Promise$_settlePromiseAt(index) {
     var value = this._settledValue;
     var receiver = this._receiverAt(index);
     var promise = this._promiseAt(index);
+
+    // SEQUELIZE SPECIFIC
+    if (this.$sql && receiver && receiver.emit) {
+        this.$sql.forEach(function (sql) {
+            receiver.emit('sql', sql);
+        });
+    }
+    // END SEQUELIZE SPECIFIC
 
     if (typeof handler === "function") {
         this._settlePromiseFromHandler(handler, receiver, value, promise);
