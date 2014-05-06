@@ -38,16 +38,16 @@ function Promise$_Settle(promises, useBound) {
 
     promises.forEach(function (promise) {
         if (Promise.is(promise)) {
-            promise.on('sql', function (sql) {
-                settled.emit('sql', sql);
+            promise.on("sql", function (sql) {
+                settled.emit("sql", sql);
             });
 
             promise.$sql.forEach(function (sql) {
-                settled.emit('sql', sql);
+                settled.emit("sql", sql);
             });
         }
-    });    
-    return settled
+    });
+    return settled;
 }
 
 Promise.settle = function Promise$Settle(promises) {

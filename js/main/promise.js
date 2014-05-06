@@ -85,6 +85,7 @@ function Promise(resolver) {
     this._settledValue = void 0;
     this._boundTo = void 0;
     
+    this.$sql = [];
     this._resolveFromResolver(function resolverIntercept(resolve, reject) {
         this.seqResolve = resolve;
         this.seqReject = reject;
@@ -94,7 +95,6 @@ function Promise(resolver) {
         }
     }.bind(this));
 
-    this.$sql = [];
 }
 
 Promise.prototype.bind = function Promise$bind(thisArg) {
@@ -206,16 +206,16 @@ function Promise$_all(promises, useBound) {
 
     promises.forEach(function (promise) {
         if (Promise.is(promise)) {
-            promise.on('sql', function (sql) {
-                prom.emit('sql', sql);
+            promise.on("sql", function (sql) {
+                prom.emit("sql", sql);
             });
 
             promise.$sql.forEach(function (sql) {
-                prom.emit('sql', sql);
-            });  
+                prom.emit("sql", sql);
+            });
         }
     });
-    return prom
+    return prom;
 }
 Promise.all = function Promise$All(promises) {
     return Promise$_all(promises, false);
@@ -892,7 +892,7 @@ Promise.prototype._settlePromiseAt = function Promise$_settlePromiseAt(index) {
 
     if (this.$sql && receiver && receiver.emit) {
         this.$sql.forEach(function (sql) {
-            receiver.emit('sql', sql);
+            receiver.emit("sql", sql);
         });
     }
     if (typeof handler === "function") {

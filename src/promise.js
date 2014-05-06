@@ -68,6 +68,7 @@ function Promise(resolver) {
     this._boundTo = void 0;
     
     // SEQUELIZE SPECIFIC
+    this.$sql = [];
     // Intercept the resolver so we can resolve with emit's
     this._resolveFromResolver(function resolverIntercept(resolve, reject) {
         this.seqResolve = resolve;
@@ -78,7 +79,6 @@ function Promise(resolver) {
         }
     }.bind(this));
 
-    this.$sql = [];
     // END SEQUELIZE SPECIFIC
 }
 
@@ -842,7 +842,7 @@ Promise.prototype._settlePromiseAt = function Promise$_settlePromiseAt(index) {
     // SEQUELIZE SPECIFIC
     if (this.$sql && receiver && receiver.emit) {
         this.$sql.forEach(function (sql) {
-            receiver.emit('sql', sql);
+            receiver.emit("sql", sql);
         });
     }
     // END SEQUELIZE SPECIFIC
