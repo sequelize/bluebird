@@ -18,18 +18,18 @@ function Promise$_Settle(promises, useBound) {
     // Propagate sql events
     promises.forEach(function (promise) {
         if (Promise.is(promise)) {
-            promise.on('sql', function (sql) {
-                settled.emit('sql', sql);
+            promise.on("sql", function (sql) {
+                settled.emit("sql", sql);
             });
 
             promise.$sql.forEach(function (sql) {
-                settled.emit('sql', sql);
+                settled.emit("sql", sql);
             });
         }
-    });    
+    });
     // END SEQUELIZE SPECIFIC
 
-    return settled
+    return settled;
 }
 
 Promise.settle = function Promise$Settle(promises) {

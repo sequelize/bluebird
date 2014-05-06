@@ -76,6 +76,7 @@ function Promise(resolver) {
     this._boundTo = void 0;
     
     // SEQUELIZE SPECIFIC
+    this.$sql = [];
     // Intercept the resolver so we can resolve with emit's
     this._resolveFromResolver(function resolverIntercept(resolve, reject) {
         this.seqResolve = resolve;
@@ -86,7 +87,6 @@ function Promise(resolver) {
         }
     }.bind(this));
 
-    this.$sql = [];
     // END SEQUELIZE SPECIFIC
 }
 
@@ -201,18 +201,18 @@ function Promise$_all(promises, useBound) {
     // Propagate sql events
     promises.forEach(function (promise) {
         if (Promise.is(promise)) {
-            promise.on('sql', function (sql) {
-                prom.emit('sql', sql);
+            promise.on("sql", function (sql) {
+                prom.emit("sql", sql);
             });
 
             promise.$sql.forEach(function (sql) {
-                prom.emit('sql', sql);
-            });  
+                prom.emit("sql", sql);
+            });
         }
     });
     // END SEQUELIZE SPECIFIC
 
-    return prom
+    return prom;
 }
 Promise.all = function Promise$All(promises) {
     return Promise$_all(promises, DONT_USE_BOUND);
@@ -953,7 +953,7 @@ Promise.prototype._settlePromiseAt = function Promise$_settlePromiseAt(index) {
     // SEQUELIZE SPECIFIC
     if (this.$sql && receiver && receiver.emit) {
         this.$sql.forEach(function (sql) {
-            receiver.emit('sql', sql);
+            receiver.emit("sql", sql);
         });
     }
     // END SEQUELIZE SPECIFIC
