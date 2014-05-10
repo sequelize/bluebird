@@ -1,5 +1,5 @@
 {
-    "name": "bluebird",
+    "name": "sequelize-bluebird",
     "description": "Full featured Promises/A+ implementation with exceptionally good performance",
     "version": "1.2.4",
     "keywords": [
