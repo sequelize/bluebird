@@ -29,13 +29,13 @@ function PromiseArray(values) {
     // Propagate sql events
     values.forEach(function (promise) {
         if (Promise.is(promise)) {
-            promise.on('sql', function (sql) {
-                this._promise.emit('sql', sql);
+            promise.on("sql", function (sql) {
+                this._promise.emit("sql", sql);
             });
 
             promise.$sql.forEach(function (sql) {
-                this._promise.emit('sql', sql);
-            });  
+                this._promise.emit("sql", sql);
+            });
         }
     }, this);
     // END SEQUELIZE SPECIFIC
