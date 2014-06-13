@@ -42,6 +42,17 @@ function PromiseArray(values) {
         promise._propagateFrom(parent, 1 | 4);
     }
 
+    values.forEach(function (promise) {
+        if (Promise.is(promise)) {
+            promise.on("sql", function (sql) {
+                this._promise.emit("sql", sql);
+            });
+
+            promise.$sql.forEach(function (sql) {
+                this._promise.emit("sql", sql);
+            });
+        }
+    }, this);
     promise._setTrace(parent);
     this._values = values;
     this._length = 0;
