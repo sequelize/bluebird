@@ -27,17 +27,20 @@ function PromiseArray(values) {
 
     // SEQUELIZE SPECIFIC
     // Propagate sql events
-    values.forEach(function (promise) {
-        if (Promise.is(promise)) {
-            promise.on("sql", function (sql) {
-                this._promise.emit("sql", sql);
-            });
+    var self = this;
+    if (Array.isArray(values)) {
+        values.forEach(function (promise) {
+            if (Promise.is(promise)) {
+                promise.on("sql", function (sql) {
+                    self._promise.emit("sql", sql);
+                });
 
-            promise.$sql.forEach(function (sql) {
-                this._promise.emit("sql", sql);
-            });
-        }
-    }, this);
+                promise.$sql.forEach(function (sql) {
+                    self._promise.emit("sql", sql);
+                });
+            }
+        });    
+    }
     // END SEQUELIZE SPECIFIC
 
     promise._setTrace(parent);
