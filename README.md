@@ -3,4 +3,4 @@ This repository is obsolete, since sequelize now works with vanilla bluebird. Bu
 
 https://github.com/sequelize/sequelize/issues/7340
 
-https://github.com/sequelize/sequelize/issues/7340
+https://github.com/sequelize/sequelize/issues/2520
